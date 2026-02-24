@@ -51,8 +51,10 @@ To authenticate with Microsoft, each user should register their own Azure AD app
      - **Microsoft Graph**:
        - `openid`
        - `profile`
-     - **Power Automate Service** (`https://service.flow.microsoft.com`):
+     - **Power Automate Service**:
        - `Flows.Read.All`
+       - `Approvals.Read.All`
+       - `Approvals.Manage.All`
    - Click **Grant admin consent** if required by your organisation's policy
 6. In **Overview**, copy your `Application (client) ID`
 
