@@ -1,6 +1,6 @@
 # My M365 Tasks
 
-A simple web tool to view and manage Microsoft Power Automate flows.
+A simple web tool to view and manage Microsoft Power Automate Approval tasks.
 
 ## Features
 
