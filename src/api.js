@@ -85,7 +85,7 @@ export async function handleApprovalResponse(environmentId, taskId, response, co
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      properties: { response, comments: comment || `${response} via Task Central` },
+      properties: { response, comments: comment || `${response} via My M365 Tasks` },
     }),
   });
 
