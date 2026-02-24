@@ -1,2 +1,2 @@
-export const AZURE_CLIENT_ID = '0d26fc90-7a3b-4f9e-ac63-9a611fb157c7';
+export const AZURE_CLIENT_ID = '8566dbb4-ff55-4c40-a847-4776e0a3cf53';
 export const REDIRECT_URI = location.origin + location.pathname;
