@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Automate task manager</title>
+    <meta name="description" content="Streamlined management of Microsoft Power Automate approval tasks">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "0.5rem",
+                        md: "calc(0.5rem - 2px)",
+                        sm: "calc(0.5rem - 4px)",
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- MSAL.js library -->
+    <script src="https://alcdn.msauth.net/browser/2.22.0/js/msal-browser.min.js"></script>
+
+    <!-- Plausible -->
+     <script defer data-domain="taskmanager.tomriha.com" src="https://plausible.io/js/script.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2L3 7v11a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V7l-7-5z"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-semibold text-gray-900">Power Automate task manager</h1>
+                </div>
+                <button id="signInButton" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
+                    <i data-lucide="lock" class="w-4 h-4 mr-2"></i>
+                    Sign In
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Privacy Notice -->
+        <div id="privacyNotice" class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <button id="closePrivacyNotice" class="float-right text-blue-600 hover:text-blue-800 text-xl font-semibold leading-none">&times;</button>
+            <div class="flex items-start space-x-3">
+                <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"></i>
+                <div class="text-sm text-blue-800">
+                    <p class="font-medium mb-1">Privacy Notice</p>
+                    <p class="mb-2">This application uses Microsoft secure authentication to access your Power Automate approval tasks.</p>
+                    <p>All authentication and data requests are handled directly between you and Microsoft. This page does not collect, store, or transmit any personal information.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <!-- Card Header -->
+            <div class="p-6 border-b border-gray-200">
+                <!-- User Profile Section (hidden initially) -->
+                <div id="userProfile" class="hidden mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <span id="userInitials" class="text-white font-medium text-lg"></span>
+                        </div>
+                        <div>
+                            <p id="userName" class="text-lg font-semibold text-gray-900"></p>
+                            <p id="userEmail" class="text-sm text-gray-600"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Load Approvals Section -->
+                <div id="environmentSection" class="hidden">
+                    <button 
+                        id="loadFlowsButton"
+                        class="w-full px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <span class="load-text">Load All Approval Tasks</span>
+                        <span class="loading-text hidden">Loading from all environments...</span>
+                    </button>
+                    <p class="mt-2 text-xs text-gray-500 text-center">
+                        This will load approval tasks from all environments using Flow API.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card Content -->
+            <div class="p-6">
+                <!-- Status Message -->
+                <div id="statusMessage" class="hidden mb-4 p-3 rounded-md"></div>
+
+                <!-- Environment Selection Section -->
+                <div id="environmentSelection" class="hidden mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-md font-medium text-gray-900">Select Environments</h3>
+                        <div class="flex space-x-2">
+                            <button 
+                                id="selectAllEnvs" 
+                                class="px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                            >
+                                Select All
+                            </button>
+                            <button 
+                                id="deselectAllEnvs" 
+                                class="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded transition-colors"
+                            >
+                                Deselect All
+                            </button>
+                        </div>
+                    </div>
+                    <div id="environmentList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 p-3 bg-gray-50 rounded border border-gray-200">
+                        <!-- Environment checkboxes will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Approvals Section -->
+                <div id="approvalsSection" class="hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Approval Tasks</h3>
+                        <span id="taskCount" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            0 tasks
+                        </span>
+                    </div>
+
+                    <!-- Table Controls -->
+                    <div id="tableControls" class="hidden table-controls">
+                        <div class="search-container flex-1 max-w-md">
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    id="searchInput" 
+                                    placeholder="Search approval tasks..."
+                                    class="search-input w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                />
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span id="filteredCount" class="text-sm text-gray-600"></span>
+                            <button 
+                                id="clearSearch" 
+                                class="hidden px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 focus:outline-none"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden space-y-3">
+                        <div class="animate-pulse">
+                            <div class="h-10 bg-gray-200 rounded mb-3"></div>
+                            <div class="space-y-2">
+                                <div class="h-16 bg-gray-100 rounded"></div>
+                                <div class="h-16 bg-gray-100 rounded"></div>
+                                <div class="h-16 bg-gray-100 rounded"></div>
+                                <div class="h-16 bg-gray-100 rounded"></div>
+                                <div class="h-16 bg-gray-100 rounded"></div>
+                                <div class="h-16 bg-gray-100 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approvals Table -->
+                    <div id="approvalsTable" class="hidden overflow-x-auto table-responsive">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-200 bg-gray-50">
+                                    <th class="sortable-header text-left py-3 px-4 font-semibold text-gray-700 text-sm" data-sort="title">
+                                        Task Title
+                                        <i data-lucide="arrow-up-down" class="sort-icon inline w-3 h-3"></i>
+                                    </th>
+                                    <th class="sortable-header text-left py-3 px-4 font-semibold text-gray-700 text-sm" data-sort="environment">
+                                        Environment
+                                        <i data-lucide="arrow-up-down" class="sort-icon inline w-3 h-3"></i>
+                                    </th>
+                                    <th class="sortable-header text-left py-3 px-4 font-semibold text-gray-700 text-sm" data-sort="creationDate">
+                                        Created Date
+                                        <i data-lucide="arrow-up-down" class="sort-icon inline w-3 h-3"></i>
+                                    </th>
+                                    <th class="sortable-header text-left py-3 px-4 font-semibold text-gray-700 text-sm" data-sort="priority">
+                                        Priority
+                                        <i data-lucide="arrow-up-down" class="sort-icon inline w-3 h-3"></i>
+                                    </th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">View</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalsTableBody">
+                                <!-- Dynamic content will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="hidden text-center py-12">
+                        <div class="text-gray-400 mb-4">
+                            <i data-lucide="inbox" class="w-12 h-12 mx-auto"></i>
+                        </div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-2">No approvals found</h4>
+                        <p class="text-gray-500">Enter your Environment ID and click "Load Approvals" to get started.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Entry point -->
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

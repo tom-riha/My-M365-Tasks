@@ -1,0 +1,243 @@
+/* Custom styles for the modern Approval Admin design */
+
+/* Button loading state styles */
+.loading .load-text {
+    display: none;
+}
+
+.loading .loading-text {
+    display: inline;
+}
+
+/* Status message variants */
+.status-success {
+    background-color: rgb(240 253 244);
+    border-color: rgb(187 247 208);
+    color: rgb(21 128 61);
+}
+
+.status-error {
+    background-color: rgb(254 242 242);
+    border-color: rgb(252 165 165);
+    color: rgb(153 27 27);
+}
+
+.status-warning {
+    background-color: rgb(255 251 235);
+    border-color: rgb(253 224 71);
+    color: rgb(146 64 14);
+}
+
+.status-info {
+    background-color: rgb(239 246 255);
+    border-color: rgb(147 197 253);
+    color: rgb(30 64 175);
+}
+
+/* Status badge colors */
+.status-pending {
+    background-color: rgb(254 249 195);
+    color: rgb(146 64 14);
+}
+
+.status-approved {
+    background-color: rgb(220 252 231);
+    color: rgb(21 128 61);
+}
+
+.status-rejected {
+    background-color: rgb(254 226 226);
+    color: rgb(153 27 27);
+}
+
+.status-completed {
+    background-color: rgb(219 234 254);
+    color: rgb(30 64 175);
+}
+
+.status-default {
+    background-color: rgb(243 244 246);
+    color: rgb(55 65 81);
+}
+
+/* Custom button variants for actions - badge style like priority column */
+.btn-approve {
+    background-color: rgb(220 252 231) !important;
+    color: rgb(21 128 61) !important;
+    border: 1px solid rgb(187 247 208) !important;
+    transition: all 0.2s;
+}
+
+.btn-approve:hover {
+    background-color: rgb(187 247 208) !important;
+    color: rgb(15 118 110) !important;
+}
+
+.btn-reject {
+    background-color: rgb(254 226 226) !important;
+    color: rgb(153 27 27) !important;
+    border: 1px solid rgb(252 165 165) !important;
+    transition: all 0.2s;
+}
+
+.btn-reject:hover {
+    background-color: rgb(252 165 165) !important;
+    color: rgb(127 29 29) !important;
+}
+
+.btn-custom {
+    background-color: rgb(243 244 246) !important;
+    color: rgb(55 65 81) !important;
+    border: 1px solid rgb(209 213 219) !important;
+    transition: all 0.2s;
+}
+
+.btn-custom:hover {
+    background-color: rgb(229 231 235) !important;
+    color: rgb(31 41 55) !important;
+}
+
+/* General action button styling - badge style */
+.action-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 2px 8px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    border-radius: 9999px !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    min-height: 20px !important;
+    border: 1px solid !important;
+    margin-right: 4px !important;
+    margin-bottom: 2px !important;
+}
+
+/* Table styles */
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.sortable-header:hover {
+    background-color: rgb(229 231 235);
+}
+
+.sort-icon {
+    margin-left: 4px;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+}
+
+.sortable-header.sorted .sort-icon {
+    opacity: 1;
+}
+
+.table-row:hover {
+    background-color: rgb(249 250 251);
+}
+
+/* Search box styling */
+.search-container {
+    position: relative;
+}
+
+.search-input {
+    padding-left: 2.5rem;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgb(156 163 175);
+}
+
+/* Table controls */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .table-responsive table {
+        min-width: 800px;
+    }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Highlight search matches */
+.search-highlight {
+    background-color: rgb(255 247 237);
+    font-weight: 600;
+}
+
+/* Custom focus styles for accessibility */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(59 130 246), 0 0 0 4px rgb(59 130 246 / 0.2);
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background-color: white !important;
+    }
+    
+    .bg-gray-50 {
+        background-color: white !important;
+    }
+    
+    .shadow-sm {
+        box-shadow: none !important;
+    }
+    
+    .border {
+        border: 1px solid #000 !important;
+    }
+}

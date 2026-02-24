@@ -1,0 +1,11 @@
+{
+  "name": "task-manager",
+  "version": "1.0.3",
+  "description": "Power Automate approval task manager",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "npx http-server . -p 3000 -o"
+  },
+  "author": "",
+  "license": "MIT"
+}
