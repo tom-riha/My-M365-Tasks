@@ -9,10 +9,12 @@ import {
   initializeSearch,
   initializeSort,
   handleApprovalResponseWithLoading,
+  showTaskDetailModal,
 } from './ui.js';
 
-// Expose the onclick handler used in dynamically generated table rows
+// Expose onclick handlers used in dynamically generated table rows
 window.handleApprovalResponseWithLoading = handleApprovalResponseWithLoading;
+window.showTaskDetailModal = showTaskDetailModal;
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 
@@ -22,7 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initializePrivacyNotice();
   initializeMSAL();
 
-  document.getElementById('signInButton')?.addEventListener('click', signIn);
+  document.getElementById('signInButton')?.addEventListener('click', async () => {
+    await signIn();
+    if (state.msalInstance.getActiveAccount()) {
+      await loadApprovalTasks();
+    }
+  });
   document.getElementById('loadFlowsButton')?.addEventListener('click', loadApprovalTasks);
 
   initializeSearch();

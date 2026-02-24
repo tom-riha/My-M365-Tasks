@@ -249,18 +249,16 @@ function createApprovalTaskRow(task, index) {
 }
 
 function createViewButton(task) {
-  const envId = task.environmentId;
-  const link = `https://make.powerautomate.com/environments/${encodeURIComponent(envId)}/approvals/received/${encodeURIComponent(task.name)}`;
-
+  const taskId = task.name.replace(/[^a-zA-Z0-9-_]/g, '-');
   return `
     <span
       class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-      onclick="window.open('${link}', '_blank')"
-      title="Open in Power Automate"
+      onclick="showTaskDetailModal('${taskId}')"
+      title="View task details"
       style="cursor: pointer;"
     >
-      <i data-lucide="external-link" class="w-3 h-3"></i>
-      <span style="margin-left: 2px;">Open</span>
+      <i data-lucide="eye" class="w-3 h-3"></i>
+      <span style="margin-left: 2px;">View</span>
     </span>
   `;
 }
@@ -285,6 +283,130 @@ function createActionButtons(task, responseOptions) {
     .join('');
 }
 
+// ─── Task detail modal ────────────────────────────────────────────────────────
+
+export function showTaskDetailModal(taskId) {
+  const task = state.filteredTasksData.find(
+    t => t.name.replace(/[^a-zA-Z0-9-_]/g, '-') === taskId
+  );
+  if (!task) return;
+
+  const props = task.properties || {};
+  const details = props.details || {};
+  const responseOptions = props.userRequest?.responseOptions ?? ['Approve', 'Reject'];
+
+  const modal    = document.getElementById('taskDetailModal');
+  const backdrop = document.getElementById('taskDetailModalBackdrop');
+  const closeBtn = document.getElementById('taskDetailModalClose');
+
+  // Populate fields
+  document.getElementById('tdTitle').textContent       = props.title || 'N/A';
+  document.getElementById('tdEnvironment').textContent = task.environmentName || '';
+  document.getElementById('tdDate').textContent        = props.creationDate
+    ? new Date(props.creationDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : 'N/A';
+  const requestor = props.principals?.find(p => p.id === props.owner?.id);
+  const requestorName  = requestor?.displayName ?? requestor?.email ?? 'N/A';
+  const requestorEmail = requestor?.email ?? '';
+  document.getElementById('tdRequestorName').textContent  = requestorName;
+  document.getElementById('tdRequestorEmail').textContent = requestorEmail;
+
+  // Priority badge
+  const priorityEl = document.getElementById('tdPriority');
+  const priority = props.priority || 'Medium';
+  priorityEl.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityBadgeClass(priority)}`;
+  priorityEl.textContent = priority;
+
+  // Description
+  const descEl = document.getElementById('tdDescription');
+  const message = typeof props.details === 'string' ? props.details : '';
+  if (message) {
+    descEl.innerHTML = typeof marked !== 'undefined' ? marked.parse(message) : escapeHtml(message).replace(/\n/g, '<br>');
+    descEl.classList.remove('text-gray-400', 'italic');
+  } else {
+    descEl.innerHTML = 'No description';
+    descEl.classList.add('text-gray-400', 'italic');
+  }
+
+  // Item link
+  const itemLinkBlock = document.getElementById('tdItemLinkBlock');
+  const itemLinkEl    = document.getElementById('tdItemLink');
+  const itemLinkNone  = document.getElementById('tdItemLinkNone');
+  const itemLink      = props.item?.link || '';
+  const itemLinkLabel = props.item?.displayName || itemLink;
+  if (itemLink) {
+    itemLinkEl.href        = itemLink;
+    itemLinkEl.textContent = itemLinkLabel;
+    itemLinkEl.classList.remove('hidden');
+    itemLinkNone?.classList.add('hidden');
+  } else {
+    itemLinkEl.classList.add('hidden');
+    itemLinkNone?.classList.remove('hidden');
+  }
+
+  // Open in PA link
+  const paLink = `https://make.powerautomate.com/environments/${encodeURIComponent(task.environmentId)}/approvals/received/${encodeURIComponent(task.name)}`;
+  document.getElementById('tdOpenLink').href = paLink;
+
+  // Action buttons
+  const buttonsContainer = document.getElementById('tdActionButtons');
+  const commentEl        = document.getElementById('tdComment');
+  commentEl.value = '';
+  buttonsContainer.innerHTML = '';
+
+  responseOptions.forEach(option => {
+    const btn = document.createElement('button');
+    btn.className = `inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${getButtonClass(option)}`;
+    btn.innerHTML = `${getButtonIcon(option)}<span>${escapeHtml(option)}</span>`;
+    btn.addEventListener('click', async () => {
+      const comment = commentEl.value.trim();
+      modal.classList.add('hidden');
+
+      // Find the matching row button to reuse loading logic
+      const btnId = `btn-${task.environmentId}-${task.name}-${option}`.replace(/[^a-zA-Z0-9-_]/g, '-');
+      const rowBtn = document.getElementById(btnId);
+
+      if (rowBtn) {
+        // Temporarily bypass the confirm modal since we already have the comment
+        const origOnClick = rowBtn.onclick;
+        rowBtn.onclick = null;
+        const { handleApprovalResponse, refreshEnvironmentTasks } = await import('./api.js');
+        const originalHTML = rowBtn.innerHTML;
+        rowBtn.innerHTML = LOADING_SPINNER;
+        rowBtn.style.cursor = 'not-allowed';
+        rowBtn.style.opacity = '0.7';
+        try {
+          await handleApprovalResponse(task.environmentId, task.name, option, comment);
+          setTimeout(async () => {
+            hideAllActionButtonsInRow(task.environmentId, task.name);
+            await refreshEnvironmentTasks(task.environmentId);
+            const term = document.getElementById('searchInput')?.value.toLowerCase() ?? '';
+            applyFiltersAndRender(term);
+          }, 500);
+        } catch (error) {
+          showStatusMessage(error.message, 'error');
+          rowBtn.innerHTML = originalHTML;
+          rowBtn.style.cursor = 'pointer';
+          rowBtn.style.opacity = '1';
+          rowBtn.onclick = origOnClick;
+        }
+      }
+    });
+    buttonsContainer.appendChild(btn);
+  });
+
+  refreshIcons();
+  modal.classList.remove('hidden');
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    closeBtn.removeEventListener('click', closeModal);
+    backdrop.removeEventListener('click', closeModal);
+  }
+  closeBtn.addEventListener('click', closeModal);
+  backdrop.addEventListener('click', closeModal);
+}
+
 // ─── Action button loading ────────────────────────────────────────────────────
 
 export function hideAllActionButtonsInRow(environmentId, taskId) {
@@ -305,6 +427,10 @@ const LOADING_SPINNER = `
 `;
 
 export async function handleApprovalResponseWithLoading(buttonElement, environmentId, taskId, response) {
+  // Show confirmation modal and wait for user input
+  const comment = await showConfirmModal(response, buttonElement);
+  if (comment === null) return; // cancelled
+
   const originalHTML = buttonElement.innerHTML;
   const originalOnClick = buttonElement.onclick;
 
@@ -314,7 +440,7 @@ export async function handleApprovalResponseWithLoading(buttonElement, environme
   buttonElement.onclick = null;
 
   try {
-    await handleApprovalResponse(environmentId, taskId, response);
+    await handleApprovalResponse(environmentId, taskId, response, comment);
 
     setTimeout(async () => {
       hideAllActionButtonsInRow(environmentId, taskId);
@@ -330,4 +456,44 @@ export async function handleApprovalResponseWithLoading(buttonElement, environme
     buttonElement.style.opacity = '1';
     buttonElement.onclick = originalOnClick;
   }
+}
+
+// Returns the comment string on confirm, or null if cancelled
+function showConfirmModal(response, buttonElement) {
+  return new Promise(resolve => {
+    const modal = document.getElementById('confirmModal');
+    const commentEl = document.getElementById('confirmModalComment');
+    const actionEl = document.getElementById('confirmModalAction');
+    const taskEl = document.getElementById('confirmModalTask');
+    const confirmBtn = document.getElementById('confirmModalConfirm');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    const backdrop = document.getElementById('confirmModalBackdrop');
+
+    // Populate context
+    if (actionEl) {
+      actionEl.textContent = response;
+      actionEl.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getButtonClass(response)}`;
+    }
+    const row = buttonElement.closest('tr');
+    if (taskEl) taskEl.textContent = row?.querySelector('td:first-child')?.textContent?.trim() ?? '';
+    if (commentEl) commentEl.value = '';
+
+    modal.classList.remove('hidden');
+    commentEl?.focus();
+
+    function close(result) {
+      modal.classList.add('hidden');
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      backdrop.removeEventListener('click', onCancel);
+      resolve(result);
+    }
+
+    function onConfirm() { close(commentEl?.value.trim() ?? ''); }
+    function onCancel() { close(null); }
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    backdrop.addEventListener('click', onCancel);
+  });
 }

@@ -13,8 +13,11 @@ export function refreshIcons() {
 export function showStatusMessage(message, type = 'info') {
   const statusMessage = document.getElementById('statusMessage');
   if (statusMessage) {
-    statusMessage.className = `mb-4 p-3 rounded-md border status-${type}`;
-    statusMessage.textContent = message;
+    statusMessage.className = `flex items-start justify-between gap-3 mb-4 p-3 rounded-md border status-${type}`;
+    statusMessage.innerHTML = `
+      <span>${message}</span>
+      <button onclick="this.closest('#statusMessage').classList.add('hidden')" class="flex-shrink-0 text-current opacity-60 hover:opacity-100 text-lg leading-none">&times;</button>
+    `;
     statusMessage.classList.remove('hidden');
 
     if (type === 'success') {

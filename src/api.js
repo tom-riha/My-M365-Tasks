@@ -74,7 +74,7 @@ export async function fetchApprovalTasksFromEnvironment(environmentId, environme
 // ─── Respond to approval ──────────────────────────────────────────────────────
 
 /** Submits an approval response. Throws on failure — callers handle status UI. */
-export async function handleApprovalResponse(environmentId, taskId, response) {
+export async function handleApprovalResponse(environmentId, taskId, response, comment = '') {
   const token = await acquireToken(FLOW_SCOPES);
 
   const url =
@@ -85,7 +85,7 @@ export async function handleApprovalResponse(environmentId, taskId, response) {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      properties: { response, comments: `${response} via Task Manager` },
+      properties: { response, comments: comment || `${response} via Task Central` },
     }),
   });
 

@@ -1,7 +1,7 @@
 {
-  "name": "task-manager",
+  "name": "task-central",
   "version": "1.0.3",
-  "description": "Power Automate approval task manager",
+  "description": "Aggregate and manage Microsoft 365 tasks across all sources in one place",
   "scripts": {
     "build": "node build.js",
     "serve": "npx http-server . -p 3000 -o"

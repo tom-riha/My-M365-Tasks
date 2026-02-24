@@ -35,8 +35,8 @@ export async function signIn() {
 // ─── Post-login UI ────────────────────────────────────────────────────────────
 
 function updateUIAfterSignIn(account) {
-  const signInButton = document.getElementById('signInButton');
-  if (signInButton) signInButton.style.display = 'none';
+  const signInPrompt = document.getElementById('signInPrompt');
+  if (signInPrompt) signInPrompt.style.display = 'none';
 
   showUserProfile(account);
 
@@ -65,3 +65,4 @@ function showUserProfile(account) {
     userProfile.classList.remove('hidden');
   }
 }
+
