@@ -390,6 +390,20 @@ export function showTaskDetailModal(taskId) {
           rowBtn.style.opacity = '1';
           rowBtn.onclick = origOnClick;
         }
+      } else {
+        // No table row rendered yet (e.g. deeplink — table loads in background).
+        // Submit the response directly without relying on a row button.
+        try {
+          await handleApprovalResponse(task.environmentId, task.name, option, comment);
+          showStatusMessage(`Task ${option.toLowerCase()}d successfully.`, 'success');
+          setTimeout(async () => {
+            await refreshEnvironmentTasks(task.environmentId);
+            const term = document.getElementById('searchInput')?.value.toLowerCase() ?? '';
+            applyFiltersAndRender(term);
+          }, 500);
+        } catch (error) {
+          showStatusMessage(error.message, 'error');
+        }
       }
     });
     buttonsContainer.appendChild(btn);
