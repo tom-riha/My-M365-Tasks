@@ -1,4 +1,4 @@
-import { initializeMSAL, signIn } from './auth.js';
+import { initializeMSAL, signIn, signOut, updateUIAfterSignIn } from './auth.js';
 import { fetchUserEnvironments, fetchApprovalTasksFromEnvironment } from './api.js';
 import { state } from './state.js';
 import { showStatusMessage } from './utils.js';
@@ -18,7 +18,7 @@ window.showTaskDetailModal = showTaskDetailModal;
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   initializePrivacyNotice();
@@ -27,6 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const deeplink = getDeeplinkParams();
   if (deeplink) {
     document.getElementById('deeplinkNotice')?.classList.remove('hidden');
+  }
+
+  // Restore session silently if the user is already signed in
+  const existingAccount = state.msalInstance.getAllAccounts()[0] ?? null;
+  if (existingAccount) {
+    state.msalInstance.setActiveAccount(existingAccount);
+    updateUIAfterSignIn(existingAccount);
+    document.getElementById('deeplinkNotice')?.classList.add('hidden');
+    if (deeplink) {
+      await loadApprovalTasksWithDeeplink(deeplink.environmentId, deeplink.taskId);
+    } else {
+      await loadApprovalTasks();
+    }
   }
 
   document.getElementById('signInButton')?.addEventListener('click', async () => {
@@ -40,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+  document.getElementById('signOutButton')?.addEventListener('click', signOut);
   document.getElementById('loadFlowsButton')?.addEventListener('click', loadApprovalTasks);
 
   initializeSearch();

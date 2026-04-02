@@ -11,7 +11,7 @@ export function initializeMSAL() {
       redirectUri: REDIRECT_URI,
     },
     cache: {
-      cacheLocation: 'sessionStorage',
+      cacheLocation: 'localStorage',
       storeAuthStateInCookie: false,
     },
   });
@@ -32,9 +32,22 @@ export async function signIn() {
   }
 }
 
+// ─── Sign out ─────────────────────────────────────────────────────────────────
+
+export async function signOut() {
+  const account = state.msalInstance.getActiveAccount();
+  try {
+    await state.msalInstance.logoutPopup({ account });
+  } catch {
+    // logoutPopup may be blocked; fall back to clearing the cache locally
+    state.msalInstance.getAllAccounts().forEach(a => state.msalInstance.clearCache({ account: a }));
+  }
+  location.reload();
+}
+
 // ─── Post-login UI ────────────────────────────────────────────────────────────
 
-function updateUIAfterSignIn(account) {
+export function updateUIAfterSignIn(account) {
   const signInPrompt = document.getElementById('signInPrompt');
   if (signInPrompt) signInPrompt.style.display = 'none';
 
