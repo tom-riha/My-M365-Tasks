@@ -1,5 +1,5 @@
 {
-  "name": "task-central",
+  "name": "my-m365-tasks",
   "version": "1.0.3",
   "description": "Aggregate and manage Microsoft 365 tasks across all sources in one place",
   "scripts": {
