@@ -12,6 +12,7 @@ A lightweight, fully client-side web tool to view and action Microsoft Power Aut
 - 📋 Task detail modal showing full description (Markdown rendered), requestor name and email, item link, and a direct link to open the task in Power Automate  
 - ⚡ Approve or reject tasks directly from the table or the detail modal, with an optional comment and a confirmation step  
 - 🔄 Automatic per-environment task refresh after each approval response  
+- 🔗 Deep link directly to a specific approval task via URL query parameters (`?environmentId=<env-id>&taskId=<task-id>`)  
 - 🔐 Fully client-side: all requests go directly to Microsoft — no backend, no proxy  
 - 🧩 Open source and self-hostable  
 
@@ -108,7 +109,7 @@ Then visit: `http://localhost:3000`
 
 - This app uses Microsoft’s official [MSAL.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) to authenticate.
 - All data requests are made directly between your browser and Microsoft's Power Automate API.
-- Authentication state is stored in `sessionStorage` only and is cleared when the browser tab is closed.
+- Authentication state is stored in `localStorage` so your session persists across page refreshes. You can sign out at any time using the sign-out button.
 - The app does **not collect**, **store**, or **transmit** any personal data.
 - 100% client-side and open source.
 
