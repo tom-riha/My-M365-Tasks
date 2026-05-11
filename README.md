@@ -16,6 +16,14 @@ A lightweight, fully client-side web tool to view and action Microsoft Power Aut
 - 🔐 Fully client-side: all requests go directly to Microsoft — no backend, no proxy  
 - 🧩 Open source and self-hostable  
 
+## 🌐 Live Demo
+
+A hosted version of the app is available at **[https://mytasks.workappholics.com](https://mytasks.workappholics.com)**.
+
+> To use it, you will still need to [register your own Azure App](#2-️-register-an-azure-app) and configure your client ID — no credentials are shared or stored server-side.
+
+---
+
 ## 🚀 Getting Started
 
 ### 1. Clone or Download the Source
