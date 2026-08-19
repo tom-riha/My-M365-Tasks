@@ -7,7 +7,7 @@ export function Toaster() {
     <div
       style={{
         position:      'fixed',
-        bottom:        16,
+        bottom:        88, // clears TaskDetailPanel/ApprovalDetailPanel's bottom-right "complete"/"approve" button
         right:         16,
         zIndex:        60,
         display:       'flex',
