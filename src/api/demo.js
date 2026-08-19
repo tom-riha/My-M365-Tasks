@@ -146,23 +146,16 @@ export function startDemo() {
 // ─── Actions — mutate the store directly, no network involved ─────────────────
 
 export function completeDemoTask(task) {
-  const { todoTasks, plannerTasks, currentUser, setData } = useStore.getState();
-  const patch = (arr) => arr.map((t) => (
-    t.id === task.id
-      ? {
-          ...t,
-          fields: {
-            ...t.fields,
-            Complete: true,
-            CompletionDate: new Date().toISOString(),
-            CompletedByLookupId: 'me',
-            CompletedByLookupValue: currentUser.name,
-          },
-        }
-      : t
-  ));
-  if (task.source === 'todo') setData('todoTasks', patch(todoTasks));
-  else setData('plannerTasks', patch(plannerTasks));
+  // Real completions disappear from the list because the app refetches
+  // afterward and the server only ever returns open tasks (see TaskView.jsx's
+  // note on why there's no Completed tab). There's no server to refetch from
+  // here, so mimic that by just removing the task rather than marking it done.
+  const { todoTasks, plannerTasks, setData } = useStore.getState();
+  if (task.source === 'todo') {
+    setData('todoTasks', todoTasks.filter((t) => t.id !== task.id));
+  } else {
+    setData('plannerTasks', plannerTasks.filter((t) => t.id !== task.id));
+  }
 }
 
 export function toggleDemoChecklistItem(task, itemId, isChecked) {
