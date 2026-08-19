@@ -1,24 +1,28 @@
 # My M365 Tasks
 
-A lightweight, fully client-side web tool to view and action Microsoft Power Automate approval tasks across all of your environments in one place.
+A lightweight, fully client-side web tool to view and action your Microsoft 365 tasks — Microsoft Planner tasks, Microsoft To Do tasks, and Power Automate approval tasks — across all of your environments in one place.
 
 ## Features
 
-- ✅ View all pending approval tasks where you are the approver, aggregated across every Power Automate environment you have access to  
-- 🌍 Filter tasks by environment using toggleable checkboxes, with select-all / deselect-all shortcuts  
-- 🔍 Search tasks in real time by title, environment, state, or result  
-- 🔃 Sort tasks by title, environment, creation date, or priority  
-- 🏷️ Priority badges (High / Medium / Low) displayed inline on every task row  
-- 📋 Task detail modal showing full description (Markdown rendered), requestor name and email, item link, and a direct link to open the task in Power Automate  
-- ⚡ Approve or reject tasks directly from the table or the detail modal, with an optional comment and a confirmation step  
-- 🔄 Automatic per-environment task refresh after each approval response  
-- 🔗 Deep link directly to a specific approval task via URL query parameters (`?environmentId=<env-id>&taskId=<task-id>`)  
-- 🔐 Fully client-side: all requests go directly to Microsoft — no backend, no proxy  
-- 🧩 Open source and self-hostable  
+- ✅ View your open Microsoft Planner and Microsoft To Do tasks, and pending Power Automate approval tasks, aggregated in one list
+- 📋 View all pending approval tasks where you are the approver, aggregated across every Power Automate environment you have access to
+- 🌍 Show/hide Planner or To Do tasks independently with a toggle
+- 🔍 Filter tasks by title
+- ⏰ Tasks grouped by urgency — overdue, due today, this week, later
+- 🏷️ Priority badges on approval tasks (High / Medium / Low)
+- 📋 Task and approval detail panels — description, Planner checklist, requestor info, and a direct link to open the item
+- ⚡ Complete a Planner or To Do task, or approve/reject an approval (with an optional comment), directly from the list or the detail panel
+- 🔃 Manual refresh across all three sources
+- 🔗 Deep link directly to a specific approval task via URL query parameters (`?environmentId=<env-id>&taskId=<task-id>`)
+- 🧭 Sidebar quick links to Planner, To Do, and Power Automate, plus a link straight to each Power Automate environment's approvals list
+- 📜 On-screen breakdown of exactly which Microsoft Graph and Power Automate permissions the app requests, and why
+- 🔐 Fully client-side: all requests go directly to Microsoft — no backend, no proxy
+- 🎭 "Try the demo" — see the app populated with example data, no sign-in and no Azure app registration required. Demo data lives only in your browser tab and is never sent anywhere.
+- 🧩 Open source and self-hostable
 
 ## 🌐 Live Demo
 
-A hosted version of the app is available at **[https://mytasks.workappholics.com](https://mytasks.workappholics.com)**.
+A hosted version of the app is available at **[https://mytasks.workappholics.com](https://mytasks.workappholics.com)** — click **Try the demo** on the sign-in screen to explore it with example data before setting up your own Azure app registration.
 
 ---
 
@@ -49,7 +53,7 @@ To authenticate with Microsoft, each user should register their own Azure AD app
    - **Supported account types:** *Accounts in this organizational directory only*
    - **Redirect URI:**
      - Platform: *Single-page application (SPA)*
-     - URI: `http://localhost` *(or wherever you'll host the tool)*
+     - URI: `http://localhost:3000` *(or wherever you'll host the tool)*
 4. Click **Register**
 5. After registration:
    - Go to **API permissions**
@@ -58,6 +62,7 @@ To authenticate with Microsoft, each user should register their own Azure AD app
      - **Microsoft Graph**:
        - `openid`
        - `profile`
+       - `Tasks.ReadWrite` *(reads and completes Planner + To Do tasks)*
      - **Power Automate Service**:
        - `Flows.Read.All`
        - `Approvals.Read.All`
@@ -78,43 +83,33 @@ export const REDIRECT_URI = location.origin + location.pathname; // Defaults to 
 
 Replace `YOUR-CLIENT-ID-HERE` with your app's **Application (client) ID** from step 6.
 
-
 ---
 
-### 4. Build (optional)
+### 4. Install & Run
 
-The project includes a simple build step that bundles the source modules into a single `bundle.js` file. If you want to run the bundled version:
+This is a React + Vite app, so dependencies must be installed first:
+
+```bash
+npm install
+npm run dev
+```
+
+Then visit: `http://localhost:3000`
+
+### 5. Build for Deployment
 
 ```bash
 npm run build
 ```
 
-If you prefer to run the unbundled source directly, skip this step — the app also works by serving the source files with a module-aware static server.
-
----
-
-### 5. Run the App
-
-Serve it with a static file server:
-
-```bash
-npm run serve
-```
-
-Or manually:
-
-```bash
-npx http-server . -p 3000 -o
-```
-
-Then visit: `http://localhost:3000`
+This produces a static `dist/` folder — deploy it to any static host (Azure Static Web Apps, Cloudflare Pages, GitHub Pages, etc.). You can preview the production build locally with `npm run preview`.
 
 ---
 
 ## 🔐 Privacy & Security
 
-- This app uses Microsoft’s official [MSAL.js](https://github.com/AzureAD/microsoft-authentication-library-for-js) to authenticate.
-- All data requests are made directly between your browser and Microsoft's Power Automate API.
+- This app uses Microsoft's official [MSAL](https://github.com/AzureAD/microsoft-authentication-library-for-js) libraries to authenticate.
+- All data requests are made directly between your browser and Microsoft's Graph and Power Automate APIs.
 - Authentication state is stored in `localStorage` so your session persists across page refreshes. You can sign out at any time using the sign-out button.
 - The app does **not collect**, **store**, or **transmit** any personal data.
 - 100% client-side and open source.
@@ -123,5 +118,5 @@ Then visit: `http://localhost:3000`
 
 ## 📝 License
 
-This project is licensed under the [MIT License](LICENSE).  
+This project is licensed under the [MIT License](LICENSE).
 Feel free to use, modify, and share.

@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --bg:            oklch(0.985 0.003 250);
+  --surface:       oklch(1 0 0);
+  --surface-2:     oklch(0.972 0.004 250);
+  --surface-sink:  oklch(0.950 0.005 250);
+  --header-bg:     oklch(0.205 0.025 264);
+  --border:        oklch(0.912 0.006 250);
+  --border-strong: oklch(0.852 0.008 250);
+  --ink:           oklch(0.205 0.020 264);
+  --ink-2:         oklch(0.365 0.015 264);
+  --ink-3:         oklch(0.525 0.012 264);
+  --ink-4:         oklch(0.680 0.010 264);
+
+  --accent:        oklch(0.525 0.165 264);
+  --accent-ink:    oklch(0.385 0.140 264);
+  --accent-soft:   oklch(0.965 0.025 264);
+  --accent-edge:   oklch(0.890 0.055 264);
+
+  --ok:            oklch(0.585 0.140 152);
+  --ok-soft:       oklch(0.960 0.035 152);
+  --warn:          oklch(0.665 0.155 60);
+  --warn-soft:     oklch(0.965 0.045 65);
+  --danger:        oklch(0.585 0.180 25);
+  --danger-soft:   oklch(0.965 0.035 25);
+  --info:          oklch(0.585 0.115 230);
+  --info-soft:     oklch(0.962 0.030 230);
+  --process:       oklch(0.495 0.135 295);
+  --process-soft:  oklch(0.962 0.030 295);
+  --process-edge:  oklch(0.895 0.060 295);
+
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  height: 100%;
+}
+
+#root { height: 100%; }
+
+button  { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+input, textarea, select { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+::selection { background: var(--accent-soft); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Animations */
+@keyframes slideIn      { from { transform: translateX(100%); }  to { transform: none; } }
+@keyframes slideInLeft  { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes slideInRight { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes slideUp      { from { transform: translateY(100%); }  to { transform: none; } }
+@keyframes scaleIn      { from { transform: translate(-50%, -50%) scale(0.96); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+@keyframes fadeIn       { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin         { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

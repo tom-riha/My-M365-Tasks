@@ -1,62 +1,74 @@
-export function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+import { useState, useEffect } from 'react';
+
+export function useIsMobile(bp = 820) {
+  const [mobile, setMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth <= bp
+  );
+  useEffect(() => {
+    const onResize = () => setMobile(window.innerWidth <= bp);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [bp]);
+  return mobile;
 }
 
-export function refreshIcons() {
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
+// ─── Name helpers ─────────────────────────────────────────────────────────────
+
+export function nameToInitials(name = '') {
+  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+}
+
+export function nameToHue(str = '') {
+  let hash = 0;
+  for (const c of str) hash = ((hash * 31) + c.charCodeAt(0)) & 0xffffffff;
+  return Math.abs(hash) % 360;
+}
+
+// ─── Date helpers ─────────────────────────────────────────────────────────────
+
+// Short relative time for "last refreshed" labels, e.g. "just now", "5m ago".
+export function formatRelativeTime(timestamp) {
+  if (!timestamp) return null;
+  const diffSec = Math.floor((Date.now() - timestamp) / 1000);
+  if (diffSec < 10) return 'just now';
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour}h ago`;
+  return new Date(timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+export function formatDate(isoStr) {
+  if (!isoStr) return '';
+  return new Date(isoStr).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  });
+}
+
+// Returns { kind, label } describing a task's due/completion state, given the
+// normalized { fields: { Complete, DueDate, CompletionDate, CompletedByLookupId } } shape
+// that api/planner.js and api/todo.js produce.
+export function dueInfo(task) {
+  if (task.fields.Complete) {
+    if (!task.fields.CompletedByLookupId) return null; // cancelled — no pill
+    const label = task.fields.CompletionDate
+      ? `Completed ${new Date(task.fields.CompletionDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+      : 'Completed';
+    return { kind: 'done', label };
   }
-}
+  if (!task.fields.DueDate) return { kind: 'future', label: 'No due date' };
 
-export function showStatusMessage(message, type = 'info') {
-  const statusMessage = document.getElementById('statusMessage');
-  if (statusMessage) {
-    statusMessage.className = `flex items-start justify-between gap-3 mb-4 p-3 rounded-md border status-${type}`;
-    statusMessage.innerHTML = `
-      <span class="flex-1 text-center">${message}</span>
-      <button onclick="this.closest('#statusMessage').classList.add('hidden')" class="flex-shrink-0 text-current opacity-60 hover:opacity-100 text-lg leading-none">&times;</button>
-    `;
-    statusMessage.classList.remove('hidden');
+  const due = new Date(task.fields.DueDate);
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dueStart   = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+  const diffDays   = Math.round((dueStart - todayStart) / 86400000);
+  const fmt = due.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-    if (type === 'success') {
-      setTimeout(() => {
-        statusMessage.classList.add('hidden');
-      }, 5000);
-    }
-  }
-}
-
-export function getPriorityBadgeClass(priority) {
-  const p = priority.toLowerCase();
-  if (p.includes('high')) return 'bg-red-100 text-red-800';
-  if (p.includes('medium') || p.includes('normal')) return 'bg-yellow-100 text-yellow-800';
-  if (p.includes('low')) return 'bg-green-100 text-green-800';
-  return 'bg-gray-100 text-gray-800';
-}
-
-export function getButtonClass(option) {
-  const o = option.toLowerCase();
-  if (o.includes('approve') || o.includes('accept')) return 'bg-green-100 text-green-800';
-  if (o.includes('reject') || o.includes('decline') || o.includes('deny')) return 'bg-red-100 text-red-800';
-  if (o.includes('complete') || o.includes('finish')) return 'bg-blue-100 text-blue-800';
-  if (o.includes('comment') || o.includes('request')) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-gray-100 text-gray-800';
-}
-
-export function getButtonIcon(option) {
-  const o = option.toLowerCase();
-  if (o.includes('approve') || o === 'ok') return '<i data-lucide="check" class="w-3 h-3"></i>';
-  if (o.includes('reject') || o.includes('deny') || o.includes('not ok')) return '<i data-lucide="x" class="w-3 h-3"></i>';
-  return '<i data-lucide="circle" class="w-3 h-3"></i>';
-}
-
-export function getStatusBadgeClass(status) {
-  const s = status.toLowerCase();
-  if (s.includes('pending')) return 'status-pending';
-  if (s.includes('approved')) return 'status-approved';
-  if (s.includes('rejected') || s.includes('denied')) return 'status-rejected';
-  if (s.includes('completed')) return 'status-completed';
-  return 'status-default';
+  if (diffDays < 0)  return { kind: 'overdue', label: `${fmt} · ${Math.abs(diffDays)}d overdue` };
+  if (diffDays === 0) return { kind: 'today',   label: `${fmt} · today` };
+  if (diffDays === 1) return { kind: 'soon',    label: `${fmt} · tomorrow` };
+  if (diffDays <= 7)  return { kind: 'soon',    label: `${fmt} · ${diffDays}d` };
+  return { kind: 'future', label: `${fmt} · ${diffDays}d` };
 }

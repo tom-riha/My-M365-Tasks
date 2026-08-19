@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.DS_Store
+AGENTS.md
+CLAUDE.md

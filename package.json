@@ -1,11 +1,27 @@
 {
   "name": "my-m365-tasks",
-  "version": "1.0.3",
-  "description": "Aggregate and manage Microsoft 365 tasks across all sources in one place",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Aggregate and manage Microsoft 365 tasks — Planner, To Do, and Power Automate approvals — across all your environments in one place",
   "scripts": {
-    "build": "node build.js",
-    "serve": "npx http-server . -p 3000 -o"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@azure/msal-browser": "^3",
+    "@azure/msal-react": "^2",
+    "react": "^18",
+    "react-dom": "^18",
+    "zustand": "^5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4",
+    "@vitejs/plugin-react": "^4",
+    "tailwindcss": "^4",
+    "vite": "^6"
+  }
 }
